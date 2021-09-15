@@ -5,6 +5,7 @@ import zipfile
 import pysrt
 import nltk
 from nltk import word_tokenize as tok
+import enchant
 
 def extract_zip(input_zip, directory):
     zip_file = zipfile.ZipFile(input_zip)
@@ -54,12 +55,24 @@ def srt_total(directory):
 
 def token_dict(list_tokens):
     D = {}
+    d_us = enchant.Dict("en_US")
+    d_gb = enchant.Dict("en_GB")
     for word in list_tokens:
-        if word in D:
-            D[word] += 1
+        
+        if d_us.check(word) or d_gb.check(word):
+            if word in D:
+                D[word] += 1
+            else:
+                D[word] = 1
         else:
-            D[word] = 1
+            next
     return D
+
+def sort_dic(dictionary):
+    #copiata da SO, non capisco come funzioni
+    sorted_d = sorted(dictionary.items(), key=lambda kv: kv[1])
+    rev_sorted = sorted_d[::-1]
+    return rev_sorted
 
 
 def main(serie, seasons):
@@ -67,22 +80,27 @@ def main(serie, seasons):
     text = srt_total(f"./{serie}")
     List_tokens = tok(text)
     dict_tok = token_dict(List_tokens)
-    return dict_tok
+    sorted_list = sort_dic(dict_tok)
+    
+    return sorted_list
 
-#if files already downloaded, skip downloading
+#if files already downloaded, skip a passage
 def main_quick(serie):
     text = srt_total(f"./{serie}")
     List_tokens = tok(text)
     dict_tok = token_dict(List_tokens)
-    return dict_tok
+    print(type(dict_tok))
+    sorted_list = sort_dic(dict_tok)
+    print(type(sorted_list))
+    
+    return sorted_list
 
 ###The function doesn't check if the zip files have already been extracted
 ###Until a checker is added, remember to cancel the folder
 
 result = main_quick("Lost")
-sorted_x = sorted(result.items(), key=lambda kv: kv[1])
 
-print(f'The type of the output is {type(sorted_x)}')
-print(f'The number of items in the output is {len(sorted_x)}')
-#print(sorted_x[10:10862])
+print(f'The type of the output is {type(result)}')
+print(f'The number of items in the output is {len(result)}')
+print(result)
 
