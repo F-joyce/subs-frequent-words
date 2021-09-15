@@ -30,21 +30,6 @@ def download_extract(serie_name, season_n):
             extract_zip(f'{serie_name}-season-{season}.zip', f"./{serie_name}")
 
 
-def srt_iterator_checker(directory):
-    counter = 0
-    listanomi = []
-    for filename in os.listdir(directory):
-        if "DVD" in filename or "3x" in filename: 
-            listanomi.append(filename)
-            counter += 1
-            continue
-        else:
-            continue
-    print(f"Totale file: {counter}")
-    listanomi.sort()
-    print(listanomi)
-
-
 def srt_total(directory):
     totaltext = ""
     for filename in os.listdir(directory):
@@ -59,14 +44,11 @@ def srt_total(directory):
             next
     return totaltext
 
-def tokenize_total(long_text):
-    return tok(long_text)
-
 
 def main(serie, seasons):
     download_extract(serie, seasons)
     text = srt_total(f"./{serie}")
-    List_tokens = tokenize_total(text)
+    List_tokens = tok(text)
     return List_tokens
 
 ###The function doesn't check if the zip files have already been extracted
