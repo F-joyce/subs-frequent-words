@@ -30,13 +30,21 @@ def download_extract(serie_name, season_n):
             extract_zip(f'{serie_name}-season-{season}.zip', f"./{serie_name}")
 
 
+def clean_newlines(string_file):
+    clean_file = string_file
+    to_clean = ["/n", "/", ".", ",", ":", "!", "?"]
+    for clean in to_clean:
+        clean_file = clean_file.replace(clean, " ")
+    return clean_file
+
 def srt_total(directory):
     totaltext = ""
     for filename in os.listdir(directory):
         if "DVD" in filename or "3x" in filename: 
             try:
                 file = pysrt.open(f'{directory}/{filename}')
-                totaltext += file.text
+                clean_text = clean_newlines(file.text)
+                totaltext += clean_text
             except UnicodeDecodeError:
                 print(f'Decode error on file {filename}')         
                 next
@@ -44,18 +52,37 @@ def srt_total(directory):
             next
     return totaltext
 
+def token_dict(list_tokens):
+    D = {}
+    for word in list_tokens:
+        if word in D:
+            D[word] += 1
+        else:
+            D[word] = 1
+    return D
+
 
 def main(serie, seasons):
     download_extract(serie, seasons)
     text = srt_total(f"./{serie}")
     List_tokens = tok(text)
-    return List_tokens
+    dict_tok = token_dict(List_tokens)
+    return dict_tok
+
+#if files already downloaded, skip downloading
+def main_quick(serie):
+    text = srt_total(f"./{serie}")
+    List_tokens = tok(text)
+    dict_tok = token_dict(List_tokens)
+    return dict_tok
 
 ###The function doesn't check if the zip files have already been extracted
 ###Until a checker is added, remember to cancel the folder
 
-result = main("Lost", 5)
+result = main_quick("Lost")
+sorted_x = sorted(result.items(), key=lambda kv: kv[1])
 
-print(f'The type of the output is {type(result)}')
-print(f'The number of items in the output is {len(result)}')
+print(f'The type of the output is {type(sorted_x)}')
+print(f'The number of items in the output is {len(sorted_x)}')
+#print(sorted_x[10:10862])
 
